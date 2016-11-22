@@ -1,0 +1,38 @@
+#!/usr/bin/env lua
+
+os.loadAPI("minenet.api/utils")
+
+function ReadSign ( direction )
+
+    if isEmpty ( direction ) then direction = "forward" end
+
+    if not isString ( direction ) or
+    (isString ( direction ) and
+      ((direction ~= "up") or (direction ~= "down") or (direction ~= "forward"))
+    ) then
+      print("Bad argument #1 to ReadSign: expected 'up', 'down' or 'forward'(default) got ".. type( direction ).."of".. direction.."!\n")
+      return
+    end
+
+    if direction == "forward" then
+      local success, block = turtle.inspect()
+      local call = "read"
+    elseif direction == "up" then
+      local success, block = turtle.inspectUp()
+      local call = "readUp"
+    elseif direction == "down" then
+      local success, block = turtle.inspectDown()
+      local call = "readDown"
+    end
+
+    if success and (block.name == "minecraft:wall_sign") then
+        local sign = peripheral.call("right",call)
+        local instructions = {}
+        sign = sign[1].." "..sign[2].." "..sign[3].." "..sign[4]
+        for key, val in string.gmatch(sign, "(%a+)%=*%:*(%-*%w+)") do
+            instructions[key] = val
+        end
+        instructions[direction] = direction
+        return instructions
+    end
+end

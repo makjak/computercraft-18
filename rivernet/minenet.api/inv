@@ -1,0 +1,149 @@
+#!/usr/bin/env lua
+
+os.loadAPI("minenet.api/utils")
+os.loadAPI("minenet.api/data")
+
+function ParseInventory ()
+  local selected = turtle.getSelectedSlot()
+  local inventory = {}
+  inventory["items"] = {}
+  inventory["empty"] = {}
+  inventory["empty"]["slots"] = {}
+
+  -- parse inventory slots and sort them to item tables
+  for slot=1,16 do
+    turtle.select(slot)
+    local item = turtle.getItemDetail()
+    if item then
+      -- add item table if it's a first occurance of an item
+      if inventory["items"][item.name] == nil then
+        inventory["items"][item.name] = {}
+      end
+      -- insert slot table into existing item table
+      table.insert(inventory["items"][item.name], item)
+      -- add additional info into inserted slot table
+      local insertedSlot = table.maxn(inventory["items"][item.name])
+      inventory["items"][item.name][insertedSlot]["slot"] = slot
+      inventory["items"][item.name][insertedSlot]["spaceLeft"] = turtle.getItemSpace()
+    else
+      table.insert(inventory["empty"]["slots"], slot)
+    end
+  end
+
+  -- add general info to each item table from sorted slots
+  for itemName,slots in pairs (inventory["items"]) do
+      local totalCount = 0
+      local totalSpaceLeft = 0
+      -- init slots numbers table
+      if inventory["items"][itemName]["slots"] == nil then
+        inventory["items"][itemName]["slots"] = {}
+      end
+      -- for each slot in item table
+      for slot=1, #inventory["items"][itemName] do
+        -- count items
+        if inventory["items"][itemName][slot]["count"] ~= nil then
+          totalCount = totalCount + inventory["items"][itemName][slot]["count"]
+        end
+        -- count free space
+        if inventory["items"][itemName][slot]["spaceLeft"] ~= nil then
+          totalSpaceLeft = totalSpaceLeft + inventory["items"][itemName][slot]["spaceLeft"]
+        end
+        --
+        table.insert(inventory["items"][itemName]["slots"], inventory["items"][itemName][slot]["slot"])
+      end
+
+      inventory["items"][itemName]["name"] = inventory["items"][itemName][1]["name"]
+      inventory["items"][itemName]["totalCount"] = totalCount
+      inventory["items"][itemName]["totalSpaceLeft"] = totalSpaceLeft
+  end
+
+  inventory["empty"]["count"] = #inventory["empty"]["slots"]
+  turtle.select(selected)
+
+  return inventory
+end
+
+function FindFirstEmpty ()
+  -- local selected = turtle.getSelectedSlot()
+  local empty
+    for slot=1,16 do
+      turtle.select(slot)
+      local item = turtle.getItemDetail()
+      if not utils.isTable( item ) then
+        empty = slot
+        break
+      end
+    end
+  -- turtle.select(selected)
+  if not utils.isNumber( empty ) then return false end
+  return empty
+end
+
+function FindFirstItem ( query )
+  -- local selected = turtle.getSelectedSlot()
+  local result = false
+    for slot=1,16 do
+      turtle.select(slot)
+      local item = turtle.getItemDetail()
+      if utils.isTable( item ) then
+        if item["name"] == query then
+          result = slot
+          break
+        end
+      end
+    end
+  -- turtle.select(selected)
+  return result
+end
+
+function Equip ( item, side )
+
+  if not utils.isString ( item ) then
+    print ("Equip(): expected item name string")
+    return false
+  end
+
+
+  if utils.isEmpty (side) then side = "right" end
+
+  if not utils.isString ( side ) then
+    print ("Equip(): expected 'left' or 'right' string")
+    return false
+  end
+
+  -- local selected = turtle.getSelectedSlot()
+  local slot = FindFirstItem( item )
+  if utils.isNumber( slot ) then
+    turtle.select(slot)
+    if side == "right" then
+      turtle.equipRight()
+    elseif side =="left" then
+      turtle.equipleft()
+    end
+  else
+    return false
+  end
+  -- turtle.select(selected)
+  return true
+end
+
+function unEquip ( side )
+  if not utils.isString ( side ) then
+    print ("unEquip(): expected 'left' or 'right' string")
+    return false
+  end
+  local empty = FindFirstEmpty()
+  -- local selected = turtle.getSelectedSlot()
+  if utils.isNumber( empty ) then
+    turtle.select(empty)
+    if side == "right" then
+      turtle.equipRight()
+    elseif side =="left" then
+      turtle.equipleft()
+    end
+  else
+    return false
+  end
+  -- turtle.select(selected)
+  return true
+end

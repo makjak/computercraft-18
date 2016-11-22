@@ -1,0 +1,39 @@
+#!/usr/bin/env lua
+os.loadAPI("minenet.api/inv")
+os.loadAPI("minenet.api/nav")
+os.loadAPI("minenet.api/readsign")
+os.loadAPI("minenet.api/misc")
+os.loadAPI("minenet.api/utils")
+
+inv.Equip("minecraft:sign")
+inv.unEquip("right")
+print (nav.getFacing())
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+-- utils.PrintTable( inv, {maxLevel = 1, noKey = true, ignore = "empty", multipleLines = false} )
+
+-- local instructions = readsign.ReadSign()
+-- local pos = {}
+-- pos[x] = tonumber(instructions[x])
+-- pos[z] = tonumber(instructions[z])
+-- pos[y] =  function ()
+--             if instructions[direction] == "up" then
+--               return tonumber(instructions[y])-1
+--             else
+--               return tonumber(instructions[y])
+--             end
+--           end
+--equip.Equip("compass")

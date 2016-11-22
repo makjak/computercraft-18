@@ -1,0 +1,30 @@
+#!/usr/bin/env lua
+
+function getPosition ()
+
+end
+
+function setPosition ()
+
+end
+
+function getFacing ()
+  local facing = false
+  if peripheral.isPresent("right") then
+    if peripheral.getType("right") == "compass" then
+      facing = peripheral.call("right", "getFacing")
+    end
+  else
+    if inv.Equip("minecraft:compass") then
+      facing = peripheral.call("right", "getFacing")
+    else
+      print("request compass")
+    end
+  end
+  return facing
+end
+
+
+function setFacing ()
+
+end
