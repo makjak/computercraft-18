@@ -1,0 +1,86 @@
+#!/usr/bin/env lua
+
+os.loadAPI("minenet.api/utils")
+
+function PrintTable ( table, args )
+
+  if not isTable ( table ) then
+    print("Bad argument #1 to PrintTable: expected table got ".. type( table ).."!\n")
+    return
+  end
+
+  --options
+  if isEmpty (args) then args = {} end
+  if isEmpty (args.currentLevel) then args.currentLevel = 0 end
+  if isEmpty (args.maxLevel) then args.maxLevel = 2 end
+  if isEmpty (args.indent) then args.indent = 1 end
+  if isEmpty (args.noKey) then args.noKey = false end
+  if isEmpty (args.noKeyStrict) then args.noKeyStrict = false end
+  if isEmpty (args.ignore) then args.ignore = false end
+  if isEmpty (args.multipleLines) then args.multipleLines = false end
+
+  if not isTable ( args ) then
+    print(
+    "Bad argument #2 to PrintTable: expected table got ".. type( args ).."!\n")
+    return
+  end
+
+  if not isNumber ( args.currentLevel ) or args.currentLevel < 0 then
+    print(
+    "Bad argument #2.currentLevel to PrintTable: expected positive number or nil got ".. type( args.currentLevel ).."!\n")
+    return
+  end
+
+  if not isNumber ( args.maxLevel ) or args.maxLevel < 0 then
+    print(
+    "Bad argument #2.maxLevel to PrintTable: expected positive number or nil got ".. type( args.maxLevel ).."!\n")
+    return
+  end
+
+  if not isNumber ( args.indent ) or args.indent < 0 then
+    print(
+    "Bad argument #2.indent to PrintTable: expected positive number or nil got ".. type( args.indent ).."!\n")
+    return
+  end
+  --endoptions
+
+  local index, lastitem = 0, ""
+  for key,value in pairs ( table ) do
+    index = index + 1
+    if key ~= args.ignore then
+      if type( value ) == "table" then
+        if args.currentLevel <= args.maxLevel then
+          for i=1,args.currentLevel*args.indent do
+            write(" ")
+          end
+          print(tostring(key)..": {")
+          args.currentLevel = args.currentLevel + 1
+          PrintTable( value, args )
+          args.currentLevel = args.currentLevel - 1
+          print("")
+          for i=0,args.currentLevel*args.indent do
+            write(" ")
+          end
+          print("}")
+        else
+          print(tostring(key).." { table }")
+        end
+        lastitem = "table"
+      else
+        if args.multipleLines or index == 1 or lastitem == "table" then
+          for i=1,args.currentLevel*args.indent do
+            write(" ")
+          end
+        end
+        if args.noKey == false or (args.noKey == true and type(tonumber(key)) ~= "number") then
+          write(tostring(key)..": ")
+        end
+        write(tostring(value).."; ")
+        if args.multipleLines then
+          print("")
+        end
+        lastitem = "item"
+      end
+    end
+  end
+end

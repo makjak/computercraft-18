@@ -1,0 +1,35 @@
+#!/usr/bin/env lua
+
+os.loadAPI("minenet.api/utils")
+
+local args = {...}
+local man = "Usage digcirgle diameter:number height:number"
+
+if utils.isNumber(args[1]) and utils.isNumber(args[2]) then
+  local diameter = args[1]
+  local height = args[2]
+else
+  print(man)
+  return false
+end
+
+local area = {}
+local radius = diameter/2
+
+for y=1, height do
+  for x=1, diameter do
+    for z=1, diameter do
+      if math.sqrt((math.pow(x, 2)) + math.pow(z, 2)) <= radius
+        area[y][x][z]=1
+      else
+        area[y][x][z]=0
+      end
+    end
+  end
+end
+
+local areadata = textutils.serialize(area)
+
+local digdata = fs.open(".digdata", "w")
+digdata.write(areadata)
+digdata.close()
